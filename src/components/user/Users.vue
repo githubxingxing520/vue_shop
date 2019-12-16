@@ -70,6 +70,7 @@
                 type="warning"
                 icon="el-icon-setting"
                 size="mini"
+                @click="showSetRoleDialog(scope.row)"
               ></el-button>
             </el-tooltip>
           </template>
@@ -147,6 +148,34 @@
         <el-button type="primary" @click="editUser">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 分配角色对话框 -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="setRoleDialogVisible"
+      width="50%"
+      @close="setRoleDialogClose"
+    >
+      <div>
+        <p>当前的用户：{{ userInfo.username }}</p>
+        <p>当前的角色：{{ userInfo.role_name }}</p>
+        <p>
+          分配新角色：
+          <el-select v-model="selectedRoleId" placeholder="请选择">
+            <el-option
+              v-for="item in roles"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveSetRole">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -160,7 +189,9 @@ export default {
     }
     var checkMobile = (role, value, callback) => {
       let regMobile = /^[1][3,4,5,6,7,8,9][0-9]{9}$/
-      if (!regMobile.test(value)) return callback(new Error('请输入合法的手机号'))
+      if (!regMobile.test(value)) {
+        return callback(new Error('请输入合法的手机号'))
+      }
       callback()
     }
     return {
@@ -174,6 +205,10 @@ export default {
       total: 0, // 总条数
       addDialogVisible: false, // 添加用户对话框是否关闭
       editDialogVisible: false, // 修改用户对话框是否关闭
+      setRoleDialogVisible: false, // 分配角色对话框是否关闭
+      userInfo: '', // 用户信息
+      selectedRoleId: '', // 下拉项选中的角色id
+      roles: [], // 所有角色列表
       addForm: {
         username: '',
         password: '',
@@ -268,12 +303,14 @@ export default {
       // 打开修改用户弹出框
       // 通过id请求用户数据
       let { data: res } = await this.$axios.get(`users/${id}`)
-      if (res.meta.status !== 200) return this.$message.error('获取用户信息失败')
+      if (res.meta.status !== 200) {
+        return this.$message.error('获取用户信息失败')
+      }
       this.editForm = res.data
       this.editDialogVisible = true
     },
     editDialogClose () {
-      // 修改用户弹出框关闭
+      // 修改用户弹出框关闭时清空表单数据
       this.$refs.editFormRef.resetFields()
     },
     editUser () {
@@ -286,7 +323,9 @@ export default {
           email: this.editForm.email,
           mobile: this.editForm.mobile
         })
-        if (res.meta.status !== 200) return this.$message.error('更新用户信息失败！')
+        if (res.meta.status !== 200) {
+          return this.$message.error('更新用户信息失败！')
+        }
         this.editDialogVisible = false
         this.$message.success('更新用户信息成功！')
         this.getUserList()
@@ -301,9 +340,14 @@ export default {
       })
         .then(async () => {
           let { data: res } = await this.$axios.delete(`users/${id}`)
-          if (res.meta.status !== 200) return this.$message.error('删除用户失败！')
+          if (res.meta.status !== 200) {
+            return this.$message.error('删除用户失败！')
+          }
           let totalPage = Math.ceil((this.total - 1) / this.queryInfo.pagesize)
-          let pageNum = totalPage < this.queryInfo.pagenum ? totalPage : this.queryInfo.pagenum
+          let pageNum =
+            totalPage < this.queryInfo.pagenum
+              ? totalPage
+              : this.queryInfo.pagenum
           this.queryInfo.pagenum = pageNum < 1 ? 1 : pageNum
           this.$message.success('删除用户成功！')
           this.getUserList()
@@ -311,6 +355,35 @@ export default {
         .catch(() => {
           this.$message.info('已取消删除')
         })
+    },
+    async showSetRoleDialog (user) {
+      // 分配角色对话框弹出
+      this.userInfo = user
+      // 查询所有角色信息
+      let { data: res } = await this.$axios.get('roles')
+      if (res.meta.status !== 200) {
+        return this.$message.error('获取所有角色信息失败')
+      }
+      this.roles = res.data
+      this.setRoleDialogVisible = true
+    },
+    async saveSetRole () {
+      // 确定保存角色分配
+      let {
+        data: res
+      } = await this.$axios.put(`users/${this.userInfo.id}/role`, {
+        rid: this.selectedRoleId
+      })
+      if (res.meta.status !== 200) {
+        return this.$message.error('设置角色失败！')
+      }
+      this.setRoleDialogVisible = false
+      this.$message.success('设置角色成功')
+      this.getUserList()
+    },
+    setRoleDialogClose () {
+      // 分配角色对话框关闭
+      this.selectedRoleId = ''
     }
   }
 }
