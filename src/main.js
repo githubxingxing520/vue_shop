@@ -9,6 +9,7 @@ import './assets/css/global.css'
 // 导入字体图标文件
 import './assets/fonts/iconfont.css'
 // 按需导入element-ui
+import TreeTable from 'vue-table-with-tree-grid'
 import {
   Form,
   FormItem,
@@ -37,7 +38,8 @@ import {
   Tag,
   Tree,
   Select,
-  Option
+  Option,
+  Cascader
 } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 Vue.use(Form)
@@ -66,6 +68,8 @@ Vue.use(Tag)
 Vue.use(Tree)
 Vue.use(Select)
 Vue.use(Option)
+Vue.use(Cascader)
+Vue.component('tree-table', TreeTable)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
 Vue.config.productionTip = false
