@@ -25,7 +25,6 @@
             :props="cascaderProps"
             @change="handleChange"
             clearable
-            change-on-select
           >
           </el-cascader>
         </el-col>
@@ -104,7 +103,7 @@
           <!-- 静态属性表格 -->
           <el-table :data="tableData" style="width: 100%" border>
             <el-table-column type="expand">
-             <template slot-scope="scope">
+              <template slot-scope="scope">
                 <el-tag
                   v-for="(tag, i) in scope.row.attr_vals"
                   :key="tag"
