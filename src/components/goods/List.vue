@@ -140,7 +140,4 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-.el-table {
-  font-size: 12px;
-}
 </style>

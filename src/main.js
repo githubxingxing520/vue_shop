@@ -55,7 +55,9 @@ import {
   Step,
   CheckboxGroup,
   Checkbox,
-  Upload
+  Upload,
+  Timeline,
+  TimelineItem
 } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 Vue.use(Form)
@@ -94,6 +96,8 @@ Vue.use(CheckboxGroup)
 Vue.use(Checkbox)
 Vue.use(Upload)
 Vue.use(VueQuillEditor)
+Vue.use(Timeline)
+Vue.use(TimelineItem)
 Vue.component('tree-table', TreeTable)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
